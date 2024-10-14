@@ -1,0 +1,89 @@
+services:
+  fastapi:
+    build: .
+    container_name: fastapi
+    ports:
+      - "8000:8000"
+    networks:
+      - elk_net
+    volumes:
+      - .:/app
+    depends_on:
+      logstash:
+        condition: service_healthy
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - elk_net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.2
+    container_name: logstash
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5044:5044"
+    networks:
+      - elk_net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9600/_node/pipelines | grep -q '\"status\":\"green\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.2
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    networks:
+      - elk_net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    networks:
+      - elk_net
+
+networks:
+  elk_net:
+    driver: bridge
+
+volumes:
+  es_data:
+    driver: local

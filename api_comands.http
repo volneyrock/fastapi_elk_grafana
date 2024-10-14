@@ -1,0 +1,8 @@
+POST http://localhost:8000/data
+Content-Type: application/json
+
+{
+  "timestamp": "2024-10-13T14:26:00",
+  "value": 120.45,
+  "message": "{\"eita\": \"lele\"}"
+}

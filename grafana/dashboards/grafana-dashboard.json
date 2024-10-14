@@ -1,0 +1,33 @@
+{
+    "dashboard": {
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Data over Time",
+          "targets": [
+            {
+              "datasource": {
+                "type": "elasticsearch",
+                "uid": "elastic-datasource"
+              },
+              "query": "myindex",
+              "metrics": [
+                {
+                  "field": "value",
+                  "type": "avg"
+                }
+              ],
+              "bucketAggs": [
+                {
+                  "type": "date_histogram",
+                  "field": "timestamp",
+                  "interval": "auto"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+  
