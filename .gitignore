@@ -9,3 +9,6 @@
 # Python #
 *.py[cod]
 *$py.class
+
+# Pytest #
+.pytest_cache/

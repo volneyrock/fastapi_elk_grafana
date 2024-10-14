@@ -10,7 +10,22 @@ python = "3.12.*"
 fastapi = "^0.115.2"
 uvicorn = "^0.31.1"
 
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.0.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[flake8]
+max-line-length = 79
+max-complexity = 5
+
+[tool.isort]
+force_single_line = true
+ensure_newline_before_comments = 'True'
+line_length = 79
+
+[tool.pytest.ini_options]
+addopts = "-p no:warnings"

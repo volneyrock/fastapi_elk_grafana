@@ -1,7 +1,8 @@
+import json
+
+import requests
 from fastapi import FastAPI
 from pydantic import BaseModel
-import requests
-import json
 
 app = FastAPI()
 
@@ -17,8 +18,12 @@ class Data(BaseModel):
 
 def send_to_logstash(data):
     headers = {'Content-Type': 'application/json'}
-    response = requests.post(LOGSTASH_URL, data=json.dumps(data), headers=headers)
-    
+    response = requests.post(
+        LOGSTASH_URL,
+        data=json.dumps(data),
+        headers=headers
+    )
+
     if response.status_code == 200:
         print("Dados enviados com sucesso para o Logstash")
     else:
